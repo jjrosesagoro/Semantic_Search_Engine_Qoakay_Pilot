@@ -7,9 +7,11 @@ from vector_engine.utils import vector_search
 
 
 @st.cache
-def read_data(data="data/misinformation_papers.csv"):
+def read_data(data="data/Merged_Dataset_Final.csv"):
     """Read the data from local."""
     return pd.read_csv(data)
+    
+    #df['year'].astype(int)
 
 
 @st.cache(allow_output_mutation=True)
@@ -35,13 +37,15 @@ def main():
     st.title("Vector-based searches with Sentence Transformers and Faiss")
 
     # User search
-    user_input = st.text_area("Search box", "covid-19 misinformation and social media")
+    user_input = st.text_area("Search box", "Semantic Scholar Literature on Computer Science")
 
     # Filters
     st.sidebar.markdown("**Filters**")
-    filter_year = st.sidebar.slider("Publication year", 2010, 2021, (2010, 2021), 1)
-    filter_citations = st.sidebar.slider("Citations", 0, 250, 0)
+    filter_year = st.sidebar.slider("Publication year", 1990, 2022, (1990, 2022), 1)
+    filter_citations = st.sidebar.slider("Citations", 0, 5000, 0)
+    filter_references = st.sidebar.slider("References", 0, 5000, 0)
     num_results = st.sidebar.slider("Number of search results", 10, 50, 10)
+    filter_openaccess = st.sidebar.multiselect("Open Access Papers", ['True', 'False'], ['True', 'False'])
 
     # Fetch results
     if user_input:
@@ -49,9 +53,13 @@ def main():
         D, I = vector_search([user_input], model, faiss_index, num_results)
         # Slice data on year
         frame = data[
-            (data.year >= filter_year[0])
-            & (data.year <= filter_year[1])
-            & (data.citations >= filter_citations)
+            #(data.year >= filter_year[0])
+            (data.year) <= int(filter_year[0])
+            #int(data.year) <= int(filter_year[1])
+            #& (data.year <= filter_year[1])
+            #& (data.citationCount >= filter_citations)
+            #& (data.referenceCount >= filter_references)
+            #& (data.isOpenAccess >= filter_openaccess)
         ]
         # Get individual results
         for id_ in I.flatten().tolist():
@@ -59,10 +67,11 @@ def main():
                 f = frame[(frame.id == id_)]
             else:
                 continue
-
+            #**isOpenAccess**: {f.iloc[0].isOpenAccess}   
             st.write(
                 f"""**{f.iloc[0].original_title}**  
-            **Citations**: {f.iloc[0].citations}  
+            **Citations**: {f.iloc[0].citationCount}
+            **References**: {f.iloc[0].referenceCount}
             **Publication year**: {f.iloc[0].year}  
             **Abstract**
             {f.iloc[0].abstract}
