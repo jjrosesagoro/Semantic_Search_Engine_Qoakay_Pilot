@@ -53,23 +53,21 @@ def main():
         D, I = vector_search([user_input], model, faiss_index, num_results)
         # Slice data on year
         frame = data[
-            #(data.year >= filter_year[0])
-            (data.year) <= int(filter_year[0])
-            #int(data.year) <= int(filter_year[1])
-            #& (data.year <= filter_year[1])
-            #& (data.citationCount >= filter_citations)
-            #& (data.referenceCount >= filter_references)
+            (data.year >= filter_year[0])        
+            & (data.year <= filter_year[1])
+            & (data.citationCount >= filter_citations)
+            & (data.referenceCount >= filter_references)
             #& (data.isOpenAccess >= filter_openaccess)
         ]
         # Get individual results
         for id_ in I.flatten().tolist():
-            if id_ in set(frame.id):
-                f = frame[(frame.id == id_)]
+            if id_ in set(frame.indexId):
+                f = frame[(frame.indexId == id_)]
             else:
                 continue
             #**isOpenAccess**: {f.iloc[0].isOpenAccess}   
             st.write(
-                f"""**{f.iloc[0].original_title}**  
+                f"""**{f.iloc[0].title}**  
             **Citations**: {f.iloc[0].citationCount}
             **References**: {f.iloc[0].referenceCount}
             **Publication year**: {f.iloc[0].year}  
